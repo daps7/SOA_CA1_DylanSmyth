@@ -3,15 +3,16 @@
 @using System.Text.Json
 @using SOA_CA1_DylanSmyth.Services
 @inject ClashOfClansApi ClashApi
+@inject ClashRoyaleApi RoyaleApi
 
 <PageTitle>Player lookup</PageTitle>
 
 <main class="workspace">
     <header class="page-header">
         <div>
-            <div class="eyebrow"><span class="eyebrow-dot"></span> CLASH OF CLANS</div>
+            <div class="eyebrow"><span class="eyebrow-dot"></span> SUPERCELL API IMPORTER</div>
             <h1>Player lookup</h1>
-            <p class="subtitle">Import a player's public game data using their player tag.</p>
+            <p class="subtitle">Load public player profiles from Clash of Clans and Clash Royale.</p>
         </div>
     </header>
 
@@ -61,32 +62,42 @@
 
         <article class="source-card">
             <div class="card-topline">
-                <div class="source-icon">API</div>
-                <div class="source-title"><span class="source-kicker">SOURCE 02</span><h2>Second API</h2></div>
-                <span class="status-pill @(secondLoaded ? "status-ready" : secondError is not null ? "status-error" : "status-idle")">
-                    <span class="status-dot"></span>@(secondLoaded ? "Loaded" : secondError is not null ? "Error" : "Optional")
+                <div class="source-icon">CR</div>
+                <div class="source-title"><span class="source-kicker">SOURCE 02</span><h2>Clash Royale player</h2></div>
+                <span class="status-pill @(royalePlayer is not null ? "status-ready" : royaleError is not null ? "status-error" : "status-idle")">
+                    <span class="status-dot"></span>@(royalePlayer is not null ? "Loaded" : royaleError is not null ? "Error" : "Ready")
                 </span>
             </div>
-            <label class="field-label" for="second-api">Endpoint URL</label>
+            <label class="field-label" for="royale-tag">Player tag</label>
             <div class="endpoint-row">
-                <span class="method-tag">GET</span>
-                <input id="second-api" class="endpoint-input" type="url" @bind="secondUrl" placeholder="https://api.example.com/data" />
+                <span class="method-tag">#</span>
+                <input id="royale-tag" class="endpoint-input" @bind="royaleTag" @bind:event="oninput"
+                       placeholder="2ABC123" @onkeydown="HandleRoyaleKeyDown" />
             </div>
             <div class="card-actions">
-                <button class="connect-button" @onclick="LoadSecondAsync" disabled="@secondLoading">
-                    @if (secondLoading) { <span class="spinner"></span><span>Loading…</span> }
-                    else { <span>↗</span><span>Load API</span> }
+                <button class="connect-button" @onclick="LoadRoyalePlayerAsync" disabled="@royaleLoading">
+                    @if (royaleLoading) { <span class="spinner"></span><span>Loading…</span> }
+                    else { <span>↗</span><span>@(royalePlayer is null ? "Load player" : "Refresh player")</span> }
                 </button>
             </div>
-            @if (secondError is not null) { <div class="error-message" role="alert">@secondError</div> }
-            @if (secondJson is not null)
+            @if (royaleError is not null) { <div class="error-message" role="alert">@royaleError</div> }
+            @if (royalePlayer is not null)
             {
-                <div class="preview-heading"><span>RESPONSE DATA</span><span>JSON</span></div>
-                <pre class="json-preview"><code>@secondJson</code></pre>
+                <div class="player-summary">
+                    <div class="player-name">@GetString(royalePlayer.Value, "name") <span>@GetString(royalePlayer.Value, "tag")</span></div>
+                    <div class="stats-grid">
+                        <div class="stat"><span>Trophies</span><strong>@GetValue(royalePlayer.Value, "trophies")</strong></div>
+                        <div class="stat"><span>Best trophies</span><strong>@GetValue(royalePlayer.Value, "bestTrophies")</strong></div>
+                        <div class="stat"><span>Wins</span><strong>@GetValue(royalePlayer.Value, "wins")</strong></div>
+                        <div class="stat"><span>Battle count</span><strong>@GetValue(royalePlayer.Value, "battleCount")</strong></div>
+                    </div>
+                    <div class="preview-heading"><span>PLAYER DATA</span><span>JSON</span></div>
+                    <pre class="json-preview"><code>@JsonSerializer.Serialize(royalePlayer.Value, jsonOptions)</code></pre>
+                </div>
             }
-            else if (!secondLoading)
+            else if (!royaleLoading)
             {
-                <div class="empty-preview"><span class="empty-symbol">{ }</span><span>Add a second API endpoint when ready</span></div>
+                <div class="empty-preview"><span class="empty-symbol">#</span><span>Enter a Clash Royale player tag</span></div>
             }
         </article>
     </section>
@@ -98,13 +109,11 @@
     private JsonElement? player;
     private bool playerLoading;
     private string? playerError;
-    private string secondUrl = string.Empty;
-    private string? secondJson;
-    private bool secondLoading;
-    private bool secondLoaded;
-    private string? secondError;
+    private string royaleTag = string.Empty;
+    private JsonElement? royalePlayer;
+    private bool royaleLoading;
+    private string? royaleError;
     private static readonly JsonSerializerOptions jsonOptions = new() { WriteIndented = true };
-    private readonly HttpClient secondApiHttp = new() { Timeout = TimeSpan.FromSeconds(20) };
 
     private async Task LoadPlayerAsync()
     {
@@ -122,28 +131,20 @@
         if (args.Key == "Enter") await LoadPlayerAsync();
     }
 
-    private async Task LoadSecondAsync()
+    private async Task HandleRoyaleKeyDown(KeyboardEventArgs args)
     {
-        secondError = null;
-        secondJson = null;
-        secondLoaded = false;
-        if (!Uri.TryCreate(secondUrl, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-        { secondError = "Enter a valid HTTP or HTTPS endpoint URL."; return; }
+        if (args.Key == "Enter") await LoadRoyalePlayerAsync();
+    }
 
-        secondLoading = true;
-        try
-        {
-            using var response = await secondApiHttp.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
-            await using var stream = await response.Content.ReadAsStreamAsync();
-            using var document = await JsonDocument.ParseAsync(stream);
-            secondJson = JsonSerializer.Serialize(document.RootElement, jsonOptions);
-            secondLoaded = true;
-        }
-        catch (HttpRequestException ex) { secondError = $"Could not fetch this endpoint. {ex.Message}"; }
-        catch (JsonException) { secondError = "The endpoint response was not valid JSON."; }
-        catch (TaskCanceledException) { secondError = "The request timed out. Try again."; }
-        finally { secondLoading = false; }
+    private async Task LoadRoyalePlayerAsync()
+    {
+        royaleError = null;
+        royalePlayer = null;
+        royaleLoading = true;
+        try { royalePlayer = await RoyaleApi.GetPlayerAsync(royaleTag); }
+        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException or HttpRequestException or TaskCanceledException)
+        { royaleError = ex.Message; }
+        finally { royaleLoading = false; }
     }
 
     private static string GetString(JsonElement element, string property) =>

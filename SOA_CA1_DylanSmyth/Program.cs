@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddHttpClient<ClashOfClansApi>();
+builder.Services.AddHttpClient<ClashRoyaleApi>();
 
 var app = builder.Build();
 
