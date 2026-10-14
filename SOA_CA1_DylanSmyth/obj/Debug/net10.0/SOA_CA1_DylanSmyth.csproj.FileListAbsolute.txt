@@ -23,7 +23,6 @@ C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\scopedcss\Components\Layout\ReconnectModal.razor.rz.scp.css
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\scopedcss\bundle\SOA_CA1_DylanSmyth.styles.css
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\scopedcss\projectbundle\SOA_CA1_DylanSmyth.bundle.scp.css
-C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\compressed\0jeqjo1qoq-{0}-dcm09vlduu-dcm09vlduu.gz
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\compressed\k29rc1lkgd-{0}-t1cqhe9u97-t1cqhe9u97.gz
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\compressed\6865xshph0-{0}-c2jlpeoesf-c2jlpeoesf.gz
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\compressed\s3mhe5hbmw-{0}-sejl45xvog-sejl45xvog.gz
@@ -83,3 +82,5 @@ C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\SOA_CA1_DylanSmyth.pdb
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\SOA_CA1_DylanSmyth.genruntimeconfig.cache
 C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\ref\SOA_CA1_DylanSmyth.dll
+C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\SOA_CA1_DylanSmyth.sourcelink.json
+C:\Users\dylan\RiderProjects\SOA_CA1_DylanSmyth\SOA_CA1_DylanSmyth\obj\Debug\net10.0\compressed\0jeqjo1qoq-{0}-4nutp2197s-4nutp2197s.gz

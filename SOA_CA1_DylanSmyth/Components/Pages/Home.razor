@@ -1,147 +1,154 @@
 @page "/"
 @rendermode InteractiveServer
 @using System.Text.Json
+@using SOA_CA1_DylanSmyth.Services
+@inject ClashOfClansApi ClashApi
 
-<PageTitle>API Importer</PageTitle>
+<PageTitle>Player lookup</PageTitle>
 
 <main class="workspace">
     <header class="page-header">
         <div>
-            <div class="eyebrow"><span class="eyebrow-dot"></span> DATA WORKSPACE</div>
-            <h1>API importer</h1>
-            <p class="subtitle">Connect two API endpoints and preview their data in one place.</p>
+            <div class="eyebrow"><span class="eyebrow-dot"></span> CLASH OF CLANS</div>
+            <h1>Player lookup</h1>
+            <p class="subtitle">Import a player's public game data using their player tag.</p>
         </div>
-        <div class="header-mark" aria-hidden="true">⇄</div>
     </header>
 
     <section class="source-grid" aria-label="API sources">
-        @for (var i = 0; i < sources.Length; i++)
-        {
-            var source = sources[i];
-            var index = i;
-            <article class="source-card">
-                <div class="card-topline">
-                    <div class="source-icon">@(index == 0 ? "A" : "B")</div>
-                    <div class="source-title">
-                        <span class="source-kicker">SOURCE 0@(index + 1)</span>
-                        <h2>API @(index + 1)</h2>
-                    </div>
-                    <span class="status-pill @(source.Loaded ? "status-ready" : source.Error is not null ? "status-error" : "status-idle")">
-                        <span class="status-dot"></span>@(source.Loaded ? "Connected" : source.Error is not null ? "Error" : "Not connected")
-                    </span>
-                </div>
+        <article class="source-card">
+            <div class="card-topline">
+                <div class="source-icon">COC</div>
+                <div class="source-title"><span class="source-kicker">SOURCE 01</span><h2>Player profile</h2></div>
+                <span class="status-pill @(player is not null ? "status-ready" : playerError is not null ? "status-error" : "status-idle")">
+                    <span class="status-dot"></span>@(player is not null ? "Loaded" : playerError is not null ? "Error" : "Ready")
+                </span>
+            </div>
 
-                <label class="field-label" for="endpoint-@index">Endpoint URL</label>
-                <div class="endpoint-row">
-                    <span class="method-tag">GET</span>
-                    <input id="endpoint-@index" class="endpoint-input" type="url" @bind="source.Url"
-                           placeholder="https://api.example.com/v1/data" />
-                </div>
-                <div class="card-actions">
-                    <button class="connect-button" @onclick="() => ImportAsync(index)" disabled="@source.Loading">
-                        @if (source.Loading)
-                        {
-                            <span class="spinner"></span><span>Fetching…</span>
-                        }
-                        else
-                        {
-                            <span>↗</span><span>@(source.Loaded ? "Refresh data" : "Fetch data")</span>
-                        }
-                    </button>
-                    @if (source.Loaded)
-                    {
-                        <span class="record-count">@(source.ItemCount) @(source.ItemCount == 1 ? "item" : "items")</span>
-                    }
-                </div>
+            <label class="field-label" for="player-tag">Player tag</label>
+            <div class="endpoint-row">
+                <span class="method-tag">#</span>
+                <input id="player-tag" class="endpoint-input" @bind="playerTag" @bind:event="oninput"
+                       placeholder="2ABC123" @onkeydown="HandlePlayerKeyDown" />
+            </div>
+            <div class="card-actions">
+                <button class="connect-button" @onclick="LoadPlayerAsync" disabled="@playerLoading">
+                    @if (playerLoading) { <span class="spinner"></span><span>Loading…</span> }
+                    else { <span>↗</span><span>@(player is null ? "Load player" : "Refresh player")</span> }
+                </button>
+            </div>
 
-                @if (source.Error is not null)
-                {
-                    <div class="error-message" role="alert">@source.Error</div>
-                }
-                @if (source.Loaded)
-                {
-                    <div class="preview-heading"><span>RESPONSE PREVIEW</span><span>JSON</span></div>
-                    <pre class="json-preview"><code>@source.Json</code></pre>
-                }
-                else if (!source.Loading)
-                {
-                    <div class="empty-preview">
-                        <span class="empty-symbol">{ }</span>
-                        <span>Response data will appear here</span>
+            @if (playerError is not null) { <div class="error-message" role="alert">@playerError</div> }
+            @if (player is not null)
+            {
+                <div class="player-summary">
+                    <div class="player-name">@GetString(player.Value, "name") <span>@GetString(player.Value, "tag")</span></div>
+                    <div class="stats-grid">
+                        <div class="stat"><span>Town Hall</span><strong>@GetValue(player.Value, "townHallLevel")</strong></div>
+                        <div class="stat"><span>Experience</span><strong>@GetValue(player.Value, "expLevel")</strong></div>
+                        <div class="stat"><span>Trophies</span><strong>@GetValue(player.Value, "trophies")</strong></div>
+                        <div class="stat"><span>Best trophies</span><strong>@GetValue(player.Value, "bestTrophies")</strong></div>
                     </div>
-                }
-            </article>
-        }
+                    <div class="preview-heading"><span>PLAYER DATA</span><span>JSON</span></div>
+                    <pre class="json-preview"><code>@JsonSerializer.Serialize(player.Value, jsonOptions)</code></pre>
+                </div>
+            }
+            else if (!playerLoading)
+            {
+                <div class="empty-preview"><span class="empty-symbol">#</span><span>Enter a player tag to load their profile</span></div>
+            }
+        </article>
+
+        <article class="source-card">
+            <div class="card-topline">
+                <div class="source-icon">API</div>
+                <div class="source-title"><span class="source-kicker">SOURCE 02</span><h2>Second API</h2></div>
+                <span class="status-pill @(secondLoaded ? "status-ready" : secondError is not null ? "status-error" : "status-idle")">
+                    <span class="status-dot"></span>@(secondLoaded ? "Loaded" : secondError is not null ? "Error" : "Optional")
+                </span>
+            </div>
+            <label class="field-label" for="second-api">Endpoint URL</label>
+            <div class="endpoint-row">
+                <span class="method-tag">GET</span>
+                <input id="second-api" class="endpoint-input" type="url" @bind="secondUrl" placeholder="https://api.example.com/data" />
+            </div>
+            <div class="card-actions">
+                <button class="connect-button" @onclick="LoadSecondAsync" disabled="@secondLoading">
+                    @if (secondLoading) { <span class="spinner"></span><span>Loading…</span> }
+                    else { <span>↗</span><span>Load API</span> }
+                </button>
+            </div>
+            @if (secondError is not null) { <div class="error-message" role="alert">@secondError</div> }
+            @if (secondJson is not null)
+            {
+                <div class="preview-heading"><span>RESPONSE DATA</span><span>JSON</span></div>
+                <pre class="json-preview"><code>@secondJson</code></pre>
+            }
+            else if (!secondLoading)
+            {
+                <div class="empty-preview"><span class="empty-symbol">{ }</span><span>Add a second API endpoint when ready</span></div>
+            }
+        </article>
     </section>
-
-    <footer class="workspace-footer">
-        <span class="footer-check">✓</span>
-        <span>Responses are displayed as formatted JSON. Enter a public endpoint that returns JSON.</span>
-    </footer>
+    <footer class="workspace-footer"><span class="footer-check">i</span><span>Player tags are public profile identifiers. API key requests are made securely by the server.</span></footer>
 </main>
 
 @code {
-    private readonly ApiSource[] sources = [new(), new()];
-    private readonly HttpClient http = new(new HttpClientHandler { AllowAutoRedirect = true })
+    private string playerTag = string.Empty;
+    private JsonElement? player;
+    private bool playerLoading;
+    private string? playerError;
+    private string secondUrl = string.Empty;
+    private string? secondJson;
+    private bool secondLoading;
+    private bool secondLoaded;
+    private string? secondError;
+    private static readonly JsonSerializerOptions jsonOptions = new() { WriteIndented = true };
+    private readonly HttpClient secondApiHttp = new() { Timeout = TimeSpan.FromSeconds(20) };
+
+    private async Task LoadPlayerAsync()
     {
-        Timeout = TimeSpan.FromSeconds(20)
-    };
+        playerError = null;
+        player = null;
+        playerLoading = true;
+        try { player = await ClashApi.GetPlayerAsync(playerTag); }
+        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException or HttpRequestException or TaskCanceledException)
+        { playerError = ex.Message; }
+        finally { playerLoading = false; }
+    }
 
-    private async Task ImportAsync(int index)
+    private async Task HandlePlayerKeyDown(KeyboardEventArgs args)
     {
-        var source = sources[index];
-        source.Error = null;
-        source.Loaded = false;
+        if (args.Key == "Enter") await LoadPlayerAsync();
+    }
 
-        if (!Uri.TryCreate(source.Url, UriKind.Absolute, out var uri) ||
-            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-        {
-            source.Error = "Enter a valid HTTP or HTTPS endpoint URL.";
-            return;
-        }
+    private async Task LoadSecondAsync()
+    {
+        secondError = null;
+        secondJson = null;
+        secondLoaded = false;
+        if (!Uri.TryCreate(secondUrl, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        { secondError = "Enter a valid HTTP or HTTPS endpoint URL."; return; }
 
-        source.Loading = true;
+        secondLoading = true;
         try
         {
-            using var response = await http.GetAsync(uri);
+            using var response = await secondApiHttp.GetAsync(uri);
             response.EnsureSuccessStatusCode();
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var document = await JsonDocument.ParseAsync(stream);
-            source.Json = JsonSerializer.Serialize(document.RootElement, new JsonSerializerOptions { WriteIndented = true });
-            source.ItemCount = document.RootElement.ValueKind switch
-            {
-                JsonValueKind.Array => document.RootElement.GetArrayLength(),
-                JsonValueKind.Object => document.RootElement.EnumerateObject().Count(),
-                JsonValueKind.Null or JsonValueKind.Undefined => 0,
-                _ => 1
-            };
-            source.Loaded = true;
+            secondJson = JsonSerializer.Serialize(document.RootElement, jsonOptions);
+            secondLoaded = true;
         }
-        catch (HttpRequestException ex)
-        {
-            source.Error = $"Could not fetch this endpoint. {ex.Message}";
-        }
-        catch (JsonException)
-        {
-            source.Error = "The endpoint response was not valid JSON.";
-        }
-        catch (TaskCanceledException)
-        {
-            source.Error = "The request timed out. Try again.";
-        }
-        finally
-        {
-            source.Loading = false;
-        }
+        catch (HttpRequestException ex) { secondError = $"Could not fetch this endpoint. {ex.Message}"; }
+        catch (JsonException) { secondError = "The endpoint response was not valid JSON."; }
+        catch (TaskCanceledException) { secondError = "The request timed out. Try again."; }
+        finally { secondLoading = false; }
     }
 
-    private sealed class ApiSource
-    {
-        public string Url { get; set; } = string.Empty;
-        public string? Json { get; set; }
-        public string? Error { get; set; }
-        public bool Loading { get; set; }
-        public bool Loaded { get; set; }
-        public int ItemCount { get; set; }
-    }
+    private static string GetString(JsonElement element, string property) =>
+        element.TryGetProperty(property, out var value) ? value.ToString() : "Unknown player";
+
+    private static string GetValue(JsonElement element, string property) =>
+        element.TryGetProperty(property, out var value) ? value.ToString() : "—";
 }
