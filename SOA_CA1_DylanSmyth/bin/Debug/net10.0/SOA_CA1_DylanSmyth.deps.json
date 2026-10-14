@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "SOA_CA1_DylanSmyth/1.0.0": {
+        "runtime": {
+          "SOA_CA1_DylanSmyth.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SOA_CA1_DylanSmyth/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -1,0 +1,147 @@
+@page "/"
+@rendermode InteractiveServer
+@using System.Text.Json
+
+<PageTitle>API Importer</PageTitle>
+
+<main class="workspace">
+    <header class="page-header">
+        <div>
+            <div class="eyebrow"><span class="eyebrow-dot"></span> DATA WORKSPACE</div>
+            <h1>API importer</h1>
+            <p class="subtitle">Connect two API endpoints and preview their data in one place.</p>
+        </div>
+        <div class="header-mark" aria-hidden="true">⇄</div>
+    </header>
+
+    <section class="source-grid" aria-label="API sources">
+        @for (var i = 0; i < sources.Length; i++)
+        {
+            var source = sources[i];
+            var index = i;
+            <article class="source-card">
+                <div class="card-topline">
+                    <div class="source-icon">@(index == 0 ? "A" : "B")</div>
+                    <div class="source-title">
+                        <span class="source-kicker">SOURCE 0@(index + 1)</span>
+                        <h2>API @(index + 1)</h2>
+                    </div>
+                    <span class="status-pill @(source.Loaded ? "status-ready" : source.Error is not null ? "status-error" : "status-idle")">
+                        <span class="status-dot"></span>@(source.Loaded ? "Connected" : source.Error is not null ? "Error" : "Not connected")
+                    </span>
+                </div>
+
+                <label class="field-label" for="endpoint-@index">Endpoint URL</label>
+                <div class="endpoint-row">
+                    <span class="method-tag">GET</span>
+                    <input id="endpoint-@index" class="endpoint-input" type="url" @bind="source.Url"
+                           placeholder="https://api.example.com/v1/data" />
+                </div>
+                <div class="card-actions">
+                    <button class="connect-button" @onclick="() => ImportAsync(index)" disabled="@source.Loading">
+                        @if (source.Loading)
+                        {
+                            <span class="spinner"></span><span>Fetching…</span>
+                        }
+                        else
+                        {
+                            <span>↗</span><span>@(source.Loaded ? "Refresh data" : "Fetch data")</span>
+                        }
+                    </button>
+                    @if (source.Loaded)
+                    {
+                        <span class="record-count">@(source.ItemCount) @(source.ItemCount == 1 ? "item" : "items")</span>
+                    }
+                </div>
+
+                @if (source.Error is not null)
+                {
+                    <div class="error-message" role="alert">@source.Error</div>
+                }
+                @if (source.Loaded)
+                {
+                    <div class="preview-heading"><span>RESPONSE PREVIEW</span><span>JSON</span></div>
+                    <pre class="json-preview"><code>@source.Json</code></pre>
+                }
+                else if (!source.Loading)
+                {
+                    <div class="empty-preview">
+                        <span class="empty-symbol">{ }</span>
+                        <span>Response data will appear here</span>
+                    </div>
+                }
+            </article>
+        }
+    </section>
+
+    <footer class="workspace-footer">
+        <span class="footer-check">✓</span>
+        <span>Responses are displayed as formatted JSON. Enter a public endpoint that returns JSON.</span>
+    </footer>
+</main>
+
+@code {
+    private readonly ApiSource[] sources = [new(), new()];
+    private readonly HttpClient http = new(new HttpClientHandler { AllowAutoRedirect = true })
+    {
+        Timeout = TimeSpan.FromSeconds(20)
+    };
+
+    private async Task ImportAsync(int index)
+    {
+        var source = sources[index];
+        source.Error = null;
+        source.Loaded = false;
+
+        if (!Uri.TryCreate(source.Url, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            source.Error = "Enter a valid HTTP or HTTPS endpoint URL.";
+            return;
+        }
+
+        source.Loading = true;
+        try
+        {
+            using var response = await http.GetAsync(uri);
+            response.EnsureSuccessStatusCode();
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            using var document = await JsonDocument.ParseAsync(stream);
+            source.Json = JsonSerializer.Serialize(document.RootElement, new JsonSerializerOptions { WriteIndented = true });
+            source.ItemCount = document.RootElement.ValueKind switch
+            {
+                JsonValueKind.Array => document.RootElement.GetArrayLength(),
+                JsonValueKind.Object => document.RootElement.EnumerateObject().Count(),
+                JsonValueKind.Null or JsonValueKind.Undefined => 0,
+                _ => 1
+            };
+            source.Loaded = true;
+        }
+        catch (HttpRequestException ex)
+        {
+            source.Error = $"Could not fetch this endpoint. {ex.Message}";
+        }
+        catch (JsonException)
+        {
+            source.Error = "The endpoint response was not valid JSON.";
+        }
+        catch (TaskCanceledException)
+        {
+            source.Error = "The request timed out. Try again.";
+        }
+        finally
+        {
+            source.Loading = false;
+        }
+    }
+
+    private sealed class ApiSource
+    {
+        public string Url { get; set; } = string.Empty;
+        public string? Json { get; set; }
+        public string? Error { get; set; }
+        public bool Loading { get; set; }
+        public bool Loaded { get; set; }
+        public int ItemCount { get; set; }
+    }
+}
