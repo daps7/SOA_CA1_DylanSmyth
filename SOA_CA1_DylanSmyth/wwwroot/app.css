@@ -63,6 +63,18 @@ h2 { margin: 3px 0 0; font-size: 15px; font-weight: 600; color: #252d3a; }
 .player-name { color: #273142; font-size: 17px; font-weight: 600; }
 .player-name span { display: block; margin-top: 4px; color: #818b99; font: 11px Consolas, monospace; }
 .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.detail-section { margin-top: 18px; padding-top: 14px; border-top: 1px solid #edf0f2; }
+.detail-section h3 { display: flex; align-items: center; gap: 7px; margin: 0 0 9px; color: #465163; font-size: 11px; font-weight: 600; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.detail-row { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 10px; border: 1px solid #e7eaee; border-radius: 5px; background: #fafbfc; font-size: 10px; }
+.detail-row span { overflow: hidden; color: #737d8b; text-overflow: ellipsis; }
+.detail-row strong { color: #303949; text-align: right; overflow-wrap: anywhere; }
+.muted-note { margin: 0; color: #818b99; font-size: 11px; }
+.section-count { margin-left: auto; color: #818b99; font-size: 10px; font-weight: 400; }
+.item-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.item-row { display: flex; justify-content: space-between; gap: 8px; padding: 8px 9px; border-radius: 5px; background: #f5f7fa; color: #5a6575; font-size: 10px; }
+.item-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-row strong { flex: 0 0 auto; color: #303949; font-weight: 600; }
 .stat { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; border: 1px solid #e7eaee; border-radius: 5px; background: #fafbfc; }
 .stat span { color: #737d8b; font-size: 10px; }
 .stat strong { color: #303949; font-size: 12px; }

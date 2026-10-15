@@ -7,9 +7,9 @@ public sealed class ClashOfClansApi(HttpClient http, IConfiguration configuratio
 {
     public async Task<JsonElement> GetPlayerAsync(string playerTag, CancellationToken cancellationToken = default)
     {
-        var apiKey = configuration["ClashOfClans:ApiKey"];
+        var apiKey = configuration["ClashOfClans:ApiKey"] ?? configuration["Supercell:ApiKey"];
         if (string.IsNullOrWhiteSpace(apiKey))
-            throw new InvalidOperationException("Add your Clash of Clans API key to user secrets or the ClashOfClans__ApiKey environment variable.");
+            throw new InvalidOperationException("Add your key to ClashOfClans:ApiKey.");
 
         var tag = playerTag.Trim();
         if (!tag.StartsWith('#')) tag = "#" + tag;

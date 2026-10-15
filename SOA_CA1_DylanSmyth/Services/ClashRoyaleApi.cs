@@ -7,9 +7,9 @@ public sealed class ClashRoyaleApi(HttpClient http, IConfiguration configuration
 {
     public async Task<JsonElement> GetPlayerAsync(string playerTag, CancellationToken cancellationToken = default)
     {
-        var apiKey = configuration["ClashRoyale:ApiKey"];
+        var apiKey = configuration["ClashRoyale:ApiKey"] ?? configuration["Supercell:ApiKey"];
         if (string.IsNullOrWhiteSpace(apiKey))
-            throw new InvalidOperationException("Add your Clash Royale API key to user secrets or the ClashRoyale__ApiKey environment variable.");
+            throw new InvalidOperationException("Add your key to ClashRoyale:ApiKey.");
 
         var tag = playerTag.Trim().TrimStart('#');
         const string validCharacters = "0289PYLQGRJCUV";

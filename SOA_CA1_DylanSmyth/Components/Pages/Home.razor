@@ -50,8 +50,27 @@
                         <div class="stat"><span>Trophies</span><strong>@GetValue(player.Value, "trophies")</strong></div>
                         <div class="stat"><span>Best trophies</span><strong>@GetValue(player.Value, "bestTrophies")</strong></div>
                     </div>
-                    <div class="preview-heading"><span>PLAYER DATA</span><span>JSON</span></div>
-                    <pre class="json-preview"><code>@JsonSerializer.Serialize(player.Value, jsonOptions)</code></pre>
+                    <div class="detail-section">
+                        <h3>Clan</h3>
+                        @if (player.Value.TryGetProperty("clan", out var clan))
+                        {
+                            <div class="detail-row"><span>@GetString(clan, "name")</span><strong>@GetString(clan, "tag")</strong></div>
+                            <div class="detail-row"><span>Role</span><strong>@GetValue(player.Value, "role")</strong></div>
+                        }
+                        else { <p class="muted-note">This player is not currently in a clan.</p> }
+                    </div>
+                    <div class="detail-section"><h3>Progress</h3><div class="detail-grid">
+                        <div class="detail-row"><span>War stars</span><strong>@GetValue(player.Value, "warStars")</strong></div>
+                        <div class="detail-row"><span>Donations</span><strong>@GetValue(player.Value, "donations")</strong></div>
+                        <div class="detail-row"><span>Donations received</span><strong>@GetValue(player.Value, "donationsReceived")</strong></div>
+                        <div class="detail-row"><span>League</span><strong>@GetNestedString(player.Value, "league", "name")</strong></div>
+                    </div></div>
+                    @if (player.Value.TryGetProperty("troops", out var troops) && troops.ValueKind == JsonValueKind.Array)
+                    {
+                        <div class="detail-section"><h3>Troops <span class="section-count">@troops.GetArrayLength()</span></h3><div class="item-list">
+                            @foreach (var troop in troops.EnumerateArray()) { <div class="item-row"><span>@GetString(troop, "name")</span><strong>Level @GetValue(troop, "level")</strong></div> }
+                        </div></div>
+                    }
                 </div>
             }
             else if (!playerLoading)
@@ -91,8 +110,18 @@
                         <div class="stat"><span>Wins</span><strong>@GetValue(royalePlayer.Value, "wins")</strong></div>
                         <div class="stat"><span>Battle count</span><strong>@GetValue(royalePlayer.Value, "battleCount")</strong></div>
                     </div>
-                    <div class="preview-heading"><span>PLAYER DATA</span><span>JSON</span></div>
-                    <pre class="json-preview"><code>@JsonSerializer.Serialize(royalePlayer.Value, jsonOptions)</code></pre>
+                    <div class="detail-section"><h3>Profile</h3><div class="detail-grid">
+                        <div class="detail-row"><span>Arena</span><strong>@GetNestedString(royalePlayer.Value, "arena", "name")</strong></div>
+                        <div class="detail-row"><span>Three crown wins</span><strong>@GetValue(royalePlayer.Value, "threeCrownWins")</strong></div>
+                        <div class="detail-row"><span>Challenge max wins</span><strong>@GetValue(royalePlayer.Value, "challengeMaxWins")</strong></div>
+                        <div class="detail-row"><span>Donations</span><strong>@GetValue(royalePlayer.Value, "donations")</strong></div>
+                    </div></div>
+                    @if (royalePlayer.Value.TryGetProperty("currentDeck", out var deck) && deck.ValueKind == JsonValueKind.Array)
+                    {
+                        <div class="detail-section"><h3>Current deck <span class="section-count">@deck.GetArrayLength() cards</span></h3><div class="item-list">
+                            @foreach (var card in deck.EnumerateArray()) { <div class="item-row"><span>@GetString(card, "name")</span><strong>Level @GetValue(card, "level")</strong></div> }
+                        </div></div>
+                    }
                 </div>
             }
             else if (!royaleLoading)
@@ -113,7 +142,6 @@
     private JsonElement? royalePlayer;
     private bool royaleLoading;
     private string? royaleError;
-    private static readonly JsonSerializerOptions jsonOptions = new() { WriteIndented = true };
 
     private async Task LoadPlayerAsync()
     {
@@ -146,6 +174,10 @@
         { royaleError = ex.Message; }
         finally { royaleLoading = false; }
     }
+
+    private static string GetNestedString(JsonElement element, string property, string nestedProperty) =>
+        element.TryGetProperty(property, out var nested) && nested.ValueKind == JsonValueKind.Object &&
+        nested.TryGetProperty(nestedProperty, out var value) ? value.ToString() : "—";
 
     private static string GetString(JsonElement element, string property) =>
         element.TryGetProperty(property, out var value) ? value.ToString() : "Unknown player";
