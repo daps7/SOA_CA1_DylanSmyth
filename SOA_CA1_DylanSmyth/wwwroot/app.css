@@ -294,3 +294,69 @@ h2 { margin-top: 4px; font-size: 19px; font-weight: 700; letter-spacing: -.25px;
     .landing-page .game-chooser { grid-template-columns: 1fr; }
     .landing-page .game-choice { min-height: 155px; }
 }
+
+/* Dark theme */
+:root { color-scheme: dark; color: #f2f4f8; background: #08090c; }
+html, body, .app-shell, .main-panel, .content-area { background: #08090c; color: #f2f4f8; }
+.site-header { border-color: #22252c; background: #0d0f13; }
+.site-brand, .landing-heading h1, h1, h2, .choice-copy strong, .player-name, .stat strong,
+.detail-row strong, .data-panel h2, .game-empty strong, .banner-badge strong { color: #f0f2f6; }
+.site-brand > span:last-child > span { color: #9aa3b2; }
+.site-links a { color: #a8b0bd; }
+.site-links a:hover { color: #fff; background: #1c2028; }
+.landing-page, .game-page { color: #e8ebf0; }
+.landing-heading h1 { color: #f0f2f6; }
+.landing-heading p, .hero-copy p, .subtitle, .choice-copy > span, .player-name span,
+.detail-row span, .stat span, .muted-note, .banner-badge small, .game-empty,
+.panel-heading > span, .landing-footer { color: #9ba5b4; }
+.game-choice, .source-card, .lookup-panel, .data-panel, .profile-banner {
+    border-color: #292d35; background: #111318; box-shadow: 0 8px 28px #0005;
+}
+.coc-choice { border-top-color: #64a96c; background: linear-gradient(130deg, #111318 55%, #141b16); }
+.royale-choice { border-top-color: #6978d7; background: linear-gradient(130deg, #111318 55%, #151622); }
+.game-choice:hover { box-shadow: 0 14px 32px #0008; }
+.choice-arrow { color: #b1bac8; }
+.choice-number, .choice-footer { color: #a0a9b6; }
+.choice-footer, .choice-watermark { border-color: #292d35; }
+.profile-banner { background: linear-gradient(115deg, #111318 45%, #172019); }
+.royale-page .profile-banner { background: linear-gradient(115deg, #111318 45%, #181a2b); }
+.stat, .detail-row, .item-row, .level-row, .clan-card, .deck-card, .game-empty, .empty-preview {
+    border-color: #292d35; background: #17191f; color: #d6dbe3;
+}
+.lookup-row, .endpoint-row { border-color: #343943; background: #14161b; }
+.endpoint-input { color: #eef1f5; }
+.endpoint-input::placeholder { color: #7e8795; }
+.method-tag { border-color: #343943; color: #91c99a; }
+.field-label, .detail-section h3 { color: #c4cad4; }
+.detail-section { border-color: #292d35; }
+.clan-card strong, .item-row strong, .level-row strong { color: #e0e4eb; }
+.clan-card small { color: #98a2b1; }
+.banner-badge { border-color: #343943; }
+.game-empty { border-style: dashed; }
+.landing-page .game-choice { border-color: #292d35; border-top-width: 3px; }
+.landing-page .coc-choice { border-top-color: #64a96c; background: linear-gradient(130deg, #111318 55%, #141b16); }
+.landing-page .royale-choice { border-top-color: #6978d7; background: linear-gradient(130deg, #111318 55%, #151622); }
+.game-hero { position: relative; display: flex; min-height: 210px; align-items: center; justify-content: space-between; margin: 30px 0 20px; padding: 24px 30px; overflow: hidden; border: 1px solid #292d35; border-radius: 14px; background: linear-gradient(110deg, #14171b 0%, #151b17 58%, #202a20 100%); }
+.royale-hero { background: linear-gradient(110deg, #14151c 0%, #191a28 58%, #28253b 100%); }
+.game-hero-copy { position: relative; z-index: 1; max-width: 580px; }
+.game-hero-copy .eyebrow { margin-bottom: 11px; color: #aab3c0; }
+.game-hero-copy h1 { margin: 0; color: #f5f6f8; font-size: clamp(29px, 4vw, 40px); font-weight: 750; letter-spacing: -1px; }
+.game-hero-copy p { margin: 10px 0 0; color: #aab3c0; font-size: 14px; }
+.game-hero-image { position: absolute; top: 0; right: 0; width: 300px; height: 100%; object-fit: cover; object-position: center 32%; opacity: .9; mask-image: linear-gradient(to right, transparent 0%, #000 38%); }
+.coc-hero .game-hero-image { object-position: center 28%; }
+.royale-hero .game-hero-image { width: 330px; object-position: center 34%; }
+.lookup-panel { margin-bottom: 20px; padding: 18px 20px; }
+.lookup-panel .field-label { margin-bottom: 8px; }
+.profile-content { gap: 14px; margin-top: 0; }
+.profile-banner, .data-panel { border-radius: 12px; }
+.data-panel { padding: 18px; }
+.collection-panel { padding-bottom: 14px; }
+.game-page .profile-stats .stat { min-height: 70px; }
+@media (max-width: 600px) {
+    .game-hero { min-height: 175px; margin: 20px 0 14px; padding: 20px; }
+    .game-hero-copy { max-width: 70%; }
+    .game-hero-copy h1 { font-size: 27px; }
+    .game-hero-copy p { max-width: 230px; font-size: 12px; line-height: 1.5; }
+    .game-hero-image, .royale-hero .game-hero-image { right: -35px; width: 190px; opacity: .68; }
+    .lookup-panel { padding: 14px; }
+}
