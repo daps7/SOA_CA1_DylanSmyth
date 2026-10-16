@@ -1,22 +1,17 @@
 @inherits LayoutComponentBase
 
 <div class="app-shell">
-    <aside class="sidebar">
-        <NavMenu />
-    </aside>
     <main class="main-panel">
-        <header class="top-bar">
-            <span class="breadcrumb-muted">Workspace</span><span class="breadcrumb-divider">/</span><span>API importer</span>
-            <span class="top-bar-right">SOA · CA1</span>
+        <header class="top-bar site-header">
+            <a class="site-brand" href="/" aria-label="Player hub home"><span class="site-brand-mark">✦</span><span>PLAYER<span>HUB</span></span></a>
+            <nav class="site-links" aria-label="Game pages"><a href="/clash-of-clans">Clash of Clans</a><a href="/clash-royale">Clash Royale</a></nav>
         </header>
-        <article class="content-area">
-            @Body
-        </article>
+        <article class="content-area">@Body</article>
     </main>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <span class="dismiss">×</span>
 </div>

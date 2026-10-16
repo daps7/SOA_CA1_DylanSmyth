@@ -1,187 +1,21 @@
 @page "/"
-@rendermode InteractiveServer
-@using System.Text.Json
-@using SOA_CA1_DylanSmyth.Services
-@inject ClashOfClansApi ClashApi
-@inject ClashRoyaleApi RoyaleApi
+<PageTitle>Player Hub · Choose a game</PageTitle>
 
-<PageTitle>Player lookup</PageTitle>
-
-<main class="workspace">
-    <header class="page-header">
-        <div>
-            <div class="eyebrow"><span class="eyebrow-dot"></span> SUPERCELL API IMPORTER</div>
-            <h1>Player lookup</h1>
-            <p class="subtitle">Load public player profiles from Clash of Clans and Clash Royale.</p>
-        </div>
+<main class="landing-page">
+    <header class="landing-heading">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> PLAYER LOOKUP</div>
+        <h1>Choose a game</h1>
+        <p>Select a game to view a player profile and their stats.</p>
     </header>
 
-    <section class="source-grid" aria-label="API sources">
-        <article class="source-card">
-            <div class="card-topline">
-                <div class="source-icon">COC</div>
-                <div class="source-title"><span class="source-kicker">SOURCE 01</span><h2>Player profile</h2></div>
-                <span class="status-pill @(player is not null ? "status-ready" : playerError is not null ? "status-error" : "status-idle")">
-                    <span class="status-dot"></span>@(player is not null ? "Loaded" : playerError is not null ? "Error" : "Ready")
-                </span>
-            </div>
-
-            <label class="field-label" for="player-tag">Player tag</label>
-            <div class="endpoint-row">
-                <span class="method-tag">#</span>
-                <input id="player-tag" class="endpoint-input" @bind="playerTag" @bind:event="oninput"
-                       placeholder="2ABC123" @onkeydown="HandlePlayerKeyDown" />
-            </div>
-            <div class="card-actions">
-                <button class="connect-button" @onclick="LoadPlayerAsync" disabled="@playerLoading">
-                    @if (playerLoading) { <span class="spinner"></span><span>Loading…</span> }
-                    else { <span>↗</span><span>@(player is null ? "Load player" : "Refresh player")</span> }
-                </button>
-            </div>
-
-            @if (playerError is not null) { <div class="error-message" role="alert">@playerError</div> }
-            @if (player is not null)
-            {
-                <div class="player-summary">
-                    <div class="player-name">@GetString(player.Value, "name") <span>@GetString(player.Value, "tag")</span></div>
-                    <div class="stats-grid">
-                        <div class="stat"><span>Town Hall</span><strong>@GetValue(player.Value, "townHallLevel")</strong></div>
-                        <div class="stat"><span>Experience</span><strong>@GetValue(player.Value, "expLevel")</strong></div>
-                        <div class="stat"><span>Trophies</span><strong>@GetValue(player.Value, "trophies")</strong></div>
-                        <div class="stat"><span>Best trophies</span><strong>@GetValue(player.Value, "bestTrophies")</strong></div>
-                    </div>
-                    <div class="detail-section">
-                        <h3>Clan</h3>
-                        @if (player.Value.TryGetProperty("clan", out var clan))
-                        {
-                            <div class="detail-row"><span>@GetString(clan, "name")</span><strong>@GetString(clan, "tag")</strong></div>
-                            <div class="detail-row"><span>Role</span><strong>@GetValue(player.Value, "role")</strong></div>
-                        }
-                        else { <p class="muted-note">This player is not currently in a clan.</p> }
-                    </div>
-                    <div class="detail-section"><h3>Progress</h3><div class="detail-grid">
-                        <div class="detail-row"><span>War stars</span><strong>@GetValue(player.Value, "warStars")</strong></div>
-                        <div class="detail-row"><span>Donations</span><strong>@GetValue(player.Value, "donations")</strong></div>
-                        <div class="detail-row"><span>Donations received</span><strong>@GetValue(player.Value, "donationsReceived")</strong></div>
-                        <div class="detail-row"><span>League</span><strong>@GetNestedString(player.Value, "league", "name")</strong></div>
-                    </div></div>
-                    @if (player.Value.TryGetProperty("troops", out var troops) && troops.ValueKind == JsonValueKind.Array)
-                    {
-                        <div class="detail-section"><h3>Troops <span class="section-count">@troops.GetArrayLength()</span></h3><div class="item-list">
-                            @foreach (var troop in troops.EnumerateArray()) { <div class="item-row"><span>@GetString(troop, "name")</span><strong>Level @GetValue(troop, "level")</strong></div> }
-                        </div></div>
-                    }
-                </div>
-            }
-            else if (!playerLoading)
-            {
-                <div class="empty-preview"><span class="empty-symbol">#</span><span>Enter a player tag to load their profile</span></div>
-            }
-        </article>
-
-        <article class="source-card">
-            <div class="card-topline">
-                <div class="source-icon">CR</div>
-                <div class="source-title"><span class="source-kicker">SOURCE 02</span><h2>Clash Royale player</h2></div>
-                <span class="status-pill @(royalePlayer is not null ? "status-ready" : royaleError is not null ? "status-error" : "status-idle")">
-                    <span class="status-dot"></span>@(royalePlayer is not null ? "Loaded" : royaleError is not null ? "Error" : "Ready")
-                </span>
-            </div>
-            <label class="field-label" for="royale-tag">Player tag</label>
-            <div class="endpoint-row">
-                <span class="method-tag">#</span>
-                <input id="royale-tag" class="endpoint-input" @bind="royaleTag" @bind:event="oninput"
-                       placeholder="2ABC123" @onkeydown="HandleRoyaleKeyDown" />
-            </div>
-            <div class="card-actions">
-                <button class="connect-button" @onclick="LoadRoyalePlayerAsync" disabled="@royaleLoading">
-                    @if (royaleLoading) { <span class="spinner"></span><span>Loading…</span> }
-                    else { <span>↗</span><span>@(royalePlayer is null ? "Load player" : "Refresh player")</span> }
-                </button>
-            </div>
-            @if (royaleError is not null) { <div class="error-message" role="alert">@royaleError</div> }
-            @if (royalePlayer is not null)
-            {
-                <div class="player-summary">
-                    <div class="player-name">@GetString(royalePlayer.Value, "name") <span>@GetString(royalePlayer.Value, "tag")</span></div>
-                    <div class="stats-grid">
-                        <div class="stat"><span>Trophies</span><strong>@GetValue(royalePlayer.Value, "trophies")</strong></div>
-                        <div class="stat"><span>Best trophies</span><strong>@GetValue(royalePlayer.Value, "bestTrophies")</strong></div>
-                        <div class="stat"><span>Wins</span><strong>@GetValue(royalePlayer.Value, "wins")</strong></div>
-                        <div class="stat"><span>Battle count</span><strong>@GetValue(royalePlayer.Value, "battleCount")</strong></div>
-                    </div>
-                    <div class="detail-section"><h3>Profile</h3><div class="detail-grid">
-                        <div class="detail-row"><span>Arena</span><strong>@GetNestedString(royalePlayer.Value, "arena", "name")</strong></div>
-                        <div class="detail-row"><span>Three crown wins</span><strong>@GetValue(royalePlayer.Value, "threeCrownWins")</strong></div>
-                        <div class="detail-row"><span>Challenge max wins</span><strong>@GetValue(royalePlayer.Value, "challengeMaxWins")</strong></div>
-                        <div class="detail-row"><span>Donations</span><strong>@GetValue(royalePlayer.Value, "donations")</strong></div>
-                    </div></div>
-                    @if (royalePlayer.Value.TryGetProperty("currentDeck", out var deck) && deck.ValueKind == JsonValueKind.Array)
-                    {
-                        <div class="detail-section"><h3>Current deck <span class="section-count">@deck.GetArrayLength() cards</span></h3><div class="item-list">
-                            @foreach (var card in deck.EnumerateArray()) { <div class="item-row"><span>@GetString(card, "name")</span><strong>Level @GetValue(card, "level")</strong></div> }
-                        </div></div>
-                    }
-                </div>
-            }
-            else if (!royaleLoading)
-            {
-                <div class="empty-preview"><span class="empty-symbol">#</span><span>Enter a Clash Royale player tag</span></div>
-            }
-        </article>
+    <section class="game-chooser" aria-label="Choose a game">
+        <a class="game-choice coc-choice" href="/clash-of-clans">
+            <span class="choice-top"><span class="choice-icon">COC</span><span class="choice-arrow">→</span></span>
+            <span class="choice-copy"><strong>Clash of Clans</strong><span>Town Hall, trophies, clan, heroes and troops.</span></span>
+        </a>
+        <a class="game-choice royale-choice" href="/clash-royale">
+            <span class="choice-top"><span class="choice-icon">CR</span><span class="choice-arrow">→</span></span>
+            <span class="choice-copy"><strong>Clash Royale</strong><span>Arena, trophies, battle stats, badges and deck.</span></span>
+        </a>
     </section>
-    <footer class="workspace-footer"><span class="footer-check">i</span><span>Player tags are public profile identifiers. API key requests are made securely by the server.</span></footer>
 </main>
-
-@code {
-    private string playerTag = string.Empty;
-    private JsonElement? player;
-    private bool playerLoading;
-    private string? playerError;
-    private string royaleTag = string.Empty;
-    private JsonElement? royalePlayer;
-    private bool royaleLoading;
-    private string? royaleError;
-
-    private async Task LoadPlayerAsync()
-    {
-        playerError = null;
-        player = null;
-        playerLoading = true;
-        try { player = await ClashApi.GetPlayerAsync(playerTag); }
-        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException or HttpRequestException or TaskCanceledException)
-        { playerError = ex.Message; }
-        finally { playerLoading = false; }
-    }
-
-    private async Task HandlePlayerKeyDown(KeyboardEventArgs args)
-    {
-        if (args.Key == "Enter") await LoadPlayerAsync();
-    }
-
-    private async Task HandleRoyaleKeyDown(KeyboardEventArgs args)
-    {
-        if (args.Key == "Enter") await LoadRoyalePlayerAsync();
-    }
-
-    private async Task LoadRoyalePlayerAsync()
-    {
-        royaleError = null;
-        royalePlayer = null;
-        royaleLoading = true;
-        try { royalePlayer = await RoyaleApi.GetPlayerAsync(royaleTag); }
-        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException or HttpRequestException or TaskCanceledException)
-        { royaleError = ex.Message; }
-        finally { royaleLoading = false; }
-    }
-
-    private static string GetNestedString(JsonElement element, string property, string nestedProperty) =>
-        element.TryGetProperty(property, out var nested) && nested.ValueKind == JsonValueKind.Object &&
-        nested.TryGetProperty(nestedProperty, out var value) ? value.ToString() : "—";
-
-    private static string GetString(JsonElement element, string property) =>
-        element.TryGetProperty(property, out var value) ? value.ToString() : "Unknown player";
-
-    private static string GetValue(JsonElement element, string property) =>
-        element.TryGetProperty(property, out var value) ? value.ToString() : "—";
-}
