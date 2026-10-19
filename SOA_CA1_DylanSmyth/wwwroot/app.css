@@ -245,6 +245,12 @@ h2 { margin-top: 4px; font-size: 19px; font-weight: 700; letter-spacing: -.25px;
 .panel-heading h2 { margin: 0; }
 .panel-heading > span { color: #7d8aa0; font-size: 11px; }
 .collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: 380px; }
+.collection-controls { display: flex; flex-wrap: wrap; gap: 7px; margin: -3px 0 12px; }
+.collection-controls input, .collection-controls select { min-width: 0; min-height: 34px; padding: 7px 9px; border: 1px solid #e1e7f0; border-radius: 7px; color: #42516a; background: #fff; font: 11px Arial, sans-serif; }
+.collection-controls input { flex: 1 1 120px; }
+.collection-controls select { flex: 0 1 auto; }
+.collection-controls input:focus, .collection-controls select:focus { border-color: #7192dc; outline: 2px solid #3869d414; }
+.collection-panel .panel-heading { margin-bottom: 12px; }
 .level-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; padding: 10px 11px; border: 1px solid #edf0f5; border-radius: 8px; background: #f9fafc; color: #526179; font-size: 11px; }
 .level-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .level-row strong { flex: 0 0 auto; color: #2e3e55; font-size: 11px; }

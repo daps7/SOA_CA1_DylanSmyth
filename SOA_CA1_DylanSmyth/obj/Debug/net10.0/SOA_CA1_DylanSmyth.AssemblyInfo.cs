@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SOA_CA1_DylanSmyth")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7dd338295d8c7c28795bc419ce6d01bab8b748f9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+093b2848a64fba3a0de5149d2abc6efb786849bb")]
 [assembly: System.Reflection.AssemblyProductAttribute("SOA_CA1_DylanSmyth")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SOA_CA1_DylanSmyth")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
