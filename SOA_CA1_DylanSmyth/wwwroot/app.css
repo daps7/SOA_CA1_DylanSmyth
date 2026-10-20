@@ -255,6 +255,14 @@ h2 { margin-top: 4px; font-size: 19px; font-weight: 700; letter-spacing: -.25px;
 .level-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .level-row strong { flex: 0 0 auto; color: #2e3e55; font-size: 11px; }
 .deck-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.card-collection-panel { min-width: 0; }
+.card-collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 8px; max-height: 560px; overflow: auto; padding: 2px; }
+.collection-card { min-width: 0; padding: 11px 12px; border: 1px solid #e5eaf1; border-radius: 9px; background: #f9fafc; }
+.collection-card-top, .collection-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.collection-card-top strong { overflow: hidden; color: #2e3d58; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.collection-card-top span { flex: 0 0 auto; color: #7885a0; font-size: 9px; text-transform: capitalize; }
+.collection-card-meta { margin-top: 9px; color: #718097; font-size: 10px; }
+.collection-card-meta strong { color: #315bb5; }
 .deck-card { position: relative; display: flex; min-height: 116px; align-items: center; flex-direction: column; justify-content: center; gap: 6px; padding: 12px 6px 9px; border: 1px solid #e5e8f5; border-radius: 10px; background: linear-gradient(160deg, #fbfbff, #f1f2fc); text-align: center; }
 .deck-card-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; color: #5968c5; background: #e4e7ff; font-size: 11px; font-weight: 800; }
 .deck-card strong { max-width: 100%; overflow: hidden; color: #2e3d58; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
