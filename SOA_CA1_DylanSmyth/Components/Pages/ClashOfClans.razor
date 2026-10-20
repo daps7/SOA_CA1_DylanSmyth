@@ -1,0 +1,179 @@
+@page "/clash-of-clans"
+@rendermode InteractiveServer
+@using System.Text.Json
+@using SOA_CA1_DylanSmyth.Services
+@using static SOA_CA1_DylanSmyth.Components.PlayerProfileFormatting
+@inject ClashOfClansApi ClashApi
+
+<PageTitle>Clash of Clans - Player profile</PageTitle>
+
+<main class="workspace game-page coc-page">
+    <header class="game-hero coc-hero">
+        <div class="game-hero-copy">
+            <div class="eyebrow">PLAYER PROFILE</div>
+            <h1>Clash of Clans</h1>
+            <p>Explore village progress, clan details and army levels.</p>
+        </div>
+        <img class="game-hero-image" src="/clash-of-clans-barbarian.png" alt="Clash of Clans Barbarian" />
+    </header>
+
+    <section class="lookup-panel">
+        <form @onsubmit="LoadPlayerAsync" @onsubmit:preventDefault>
+            <label class="field-label" for="player-tag">Player tag</label>
+            <div class="lookup-row">
+                <span class="method-tag">#</span>
+                <input id="player-tag" class="endpoint-input" @bind="playerTag" placeholder="2ABC123" />
+                <button class="connect-button" disabled="@isLoading">
+                    @(isLoading ? "Loading..." : player is null ? "Find player" : "Refresh profile")
+                </button>
+            </div>
+        </form>
+
+        @if (errorMessage is not null)
+        {
+            <div class="error-message" role="alert">@errorMessage</div>
+        }
+    </section>
+
+    @if (player is { } profile)
+    {
+        <section class="profile-content">
+            <article class="profile-banner">
+                <div class="player-identity">
+                    <div class="player-avatar">@GetInitials(GetText(profile, "name"))</div>
+                    <div class="player-name">
+                        @GetText(profile, "name")
+                        <span>@GetText(profile, "tag")</span>
+                    </div>
+                </div>
+                <div class="banner-badge"><small>TOWN HALL</small><strong>@GetText(profile, "townHallLevel")</strong></div>
+                <div class="banner-badge"><small>LEAGUE</small><strong>@GetNestedText(profile, "league", "name")</strong></div>
+            </article>
+
+            <section class="stats-grid profile-stats" aria-label="Player stats">
+                <div class="stat"><span>Trophies</span><strong>@GetText(profile, "trophies")</strong></div>
+                <div class="stat"><span>Best trophies</span><strong>@GetText(profile, "bestTrophies")</strong></div>
+                <div class="stat"><span>Experience level</span><strong>@GetText(profile, "expLevel")</strong></div>
+                <div class="stat"><span>War stars</span><strong>@GetText(profile, "warStars")</strong></div>
+            </section>
+
+            <div class="profile-columns">
+                <article class="data-panel">
+                    <h2>Clan</h2>
+                    @if (profile.TryGetProperty("clan", out var clan))
+                    {
+                        <div class="clan-card">
+                            <span class="clan-emblem">*</span>
+                            <div><strong>@GetText(clan, "name")</strong><small>@GetText(clan, "tag")</small></div>
+                            <span class="role-chip">@GetText(profile, "role")</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="muted-note">This player is not currently in a clan.</p>
+                    }
+
+                    <div class="detail-grid">
+                        <div class="detail-row"><span>Donations</span><strong>@GetText(profile, "donations")</strong></div>
+                        <div class="detail-row"><span>Received</span><strong>@GetText(profile, "donationsReceived")</strong></div>
+                        <div class="detail-row"><span>Capital contributions</span><strong>@GetText(profile, "clanCapitalContributions")</strong></div>
+                    </div>
+                </article>
+
+                <article class="data-panel">
+                    <h2>Heroes</h2>
+                    @if (profile.TryGetProperty("heroes", out var heroes) && heroes.ValueKind == JsonValueKind.Array)
+                    {
+                        <div class="collection-controls">
+                            <input aria-label="Search heroes" placeholder="Search heroes" @bind="heroSearch" @bind:event="oninput" />
+                            <select aria-label="Sort heroes" @bind="heroSort"><option value="name">Name A–Z</option><option value="level">Level high to low</option></select>
+                            <select aria-label="Minimum hero level" @bind="heroMinimum"><option value="0">Any level</option><option value="10">Level 10+</option><option value="20">Level 20+</option><option value="40">Level 40+</option></select>
+                        </div>
+                        <div class="item-list">
+                            @foreach (var hero in FilterItems(heroes, heroSearch, heroSort, heroMinimum))
+                            {
+                                <div class="level-row">
+                                    <span>@GetText(hero, "name")</span>
+                                    <strong>Level @GetText(hero, "level")</strong>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="muted-note">Hero information is unavailable.</p>
+                    }
+                </article>
+            </div>
+
+            @if (profile.TryGetProperty("troops", out var troops) && troops.ValueKind == JsonValueKind.Array)
+            {
+                <article class="data-panel collection-panel">
+                    <div class="panel-heading"><h2>Troops</h2><span>@FilterItems(troops, troopSearch, troopSort, troopMinimum).Count() / @troops.GetArrayLength() units</span></div>
+                    <div class="collection-controls">
+                        <input aria-label="Search troops" placeholder="Search troops" @bind="troopSearch" @bind:event="oninput" />
+                        <select aria-label="Sort troops" @bind="troopSort"><option value="name">Name A–Z</option><option value="level">Level high to low</option></select>
+                        <select aria-label="Minimum troop level" @bind="troopMinimum"><option value="0">Any level</option><option value="5">Level 5+</option><option value="10">Level 10+</option><option value="15">Level 15+</option></select>
+                    </div>
+                    <div class="item-list collection-grid">
+                        @foreach (var troop in FilterItems(troops, troopSearch, troopSort, troopMinimum))
+                        {
+                            <div class="level-row">
+                                <span>@GetText(troop, "name")</span>
+                                <strong>Level @GetText(troop, "level")</strong>
+                            </div>
+                        }
+                    </div>
+                </article>
+            }
+        </section>
+    }
+    else if (!isLoading && errorMessage is null)
+    {
+        <div class="game-empty">
+            <strong>Look up your village</strong>
+            <span>Enter a player tag above to see village stats and army details.</span>
+        </div>
+    }
+</main>
+
+@code {
+    private string playerTag = string.Empty;
+    private JsonElement? player;
+    private string? errorMessage;
+    private bool isLoading;
+    private string heroSearch = string.Empty, heroSort = "name", heroMinimum = "0";
+    private string troopSearch = string.Empty, troopSort = "name", troopMinimum = "0";
+
+    private static IEnumerable<JsonElement> FilterItems(JsonElement items, string search, string sort, string minimum)
+    {
+        var minLevel = int.TryParse(minimum, out var parsed) ? parsed : 0;
+        var filtered = items.EnumerateArray()
+            .Where(item => GetText(item, "name").Contains(search.Trim(), StringComparison.OrdinalIgnoreCase))
+            .Where(item => int.TryParse(GetText(item, "level"), out var level) && level >= minLevel);
+        return sort == "level"
+            ? filtered.OrderByDescending(item => int.TryParse(GetText(item, "level"), out var level) ? level : 0).ThenBy(item => GetText(item, "name"))
+            : filtered.OrderBy(item => GetText(item, "name"));
+    }
+
+    private async Task LoadPlayerAsync()
+    {
+        errorMessage = null;
+        player = null;
+        isLoading = true;
+
+        try
+        {
+            player = await ClashApi.GetPlayerAsync(playerTag);
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or ArgumentException or HttpRequestException or TaskCanceledException)
+        {
+            errorMessage = exception.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+}

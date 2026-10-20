@@ -365,6 +365,14 @@ html, body, .app-shell, .main-panel, .content-area { background: #08090c; color:
 .profile-banner, .data-panel { border-radius: 12px; }
 .data-panel { padding: 18px; }
 .collection-panel { padding-bottom: 14px; }
+.card-collection-panel .collection-card { border-color: #292d35; background: #17191f; }
+.card-collection-panel .collection-card-top strong { color: #e0e4eb; }
+.card-collection-panel .collection-card-top span,
+.card-collection-panel .collection-card-meta { color: #9ba5b4; }
+.card-collection-panel .collection-card-meta strong { color: #aebcff; }
+.card-collection-panel .collection-controls input,
+.card-collection-panel .collection-controls select { border-color: #343943; color: #e0e4eb; background: #14161b; color-scheme: dark; }
+.card-collection-panel .collection-controls input::placeholder { color: #7e8795; }
 .game-page .profile-stats .stat { min-height: 70px; }
 @media (max-width: 600px) {
     .game-hero { min-height: 175px; margin: 20px 0 14px; padding: 20px; }
