@@ -109,21 +109,35 @@
             @if (profile.TryGetProperty("troops", out var troops) && troops.ValueKind == JsonValueKind.Array)
             {
                 <article class="data-panel collection-panel">
-                    <div class="panel-heading"><h2>Troops</h2><span>@FilterItems(troops, troopSearch, troopSort, troopMinimum).Count() / @troops.GetArrayLength() units</span></div>
+                    <div class="panel-heading"><h2>Troops</h2><span>@(FilterTroops(troops, "home").Count() + FilterTroops(troops, "builder").Count() + FilterTroops(troops, "super").Count()) shown / @troops.GetArrayLength() units</span></div>
                     <div class="collection-controls">
                         <input aria-label="Search troops" placeholder="Search troops" @bind="troopSearch" @bind:event="oninput" />
                         <select aria-label="Sort troops" @bind="troopSort"><option value="name">Name A–Z</option><option value="level">Level high to low</option></select>
                         <select aria-label="Minimum troop level" @bind="troopMinimum"><option value="0">Any level</option><option value="5">Level 5+</option><option value="10">Level 10+</option><option value="15">Level 15+</option></select>
                     </div>
-                    <div class="item-list collection-grid">
-                        @foreach (var troop in FilterItems(troops, troopSearch, troopSort, troopMinimum))
-                        {
-                            <div class="level-row">
-                                <span>@GetText(troop, "name")</span>
-                                <strong>Level @GetText(troop, "level")</strong>
-                            </div>
-                        }
-                    </div>
+                    @foreach (var group in new[] { (Key: "home", Title: "Home Village"), (Key: "builder", Title: "Builder Base"), (Key: "super", Title: "Super Troops") })
+                    {
+                        var groupTroops = FilterTroops(troops, group.Key).ToList();
+                        <section class="troop-group" aria-label="@group.Title troops">
+                            <div class="panel-heading troop-group-heading"><h3>@group.Title</h3><span>@groupTroops.Count units</span></div>
+                            @if (groupTroops.Count > 0)
+                            {
+                                <div class="item-list collection-grid">
+                                    @foreach (var troop in groupTroops)
+                                    {
+                                        <div class="level-row">
+                                            <span>@GetText(troop, "name")</span>
+                                            <strong>Level @GetText(troop, "level")</strong>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="muted-note">No troops match these search and filter settings.</p>
+                            }
+                        </section>
+                    }
                 </article>
             }
         </section>
@@ -154,6 +168,32 @@
         return sort == "level"
             ? filtered.OrderByDescending(item => int.TryParse(GetText(item, "level"), out var level) ? level : 0).ThenBy(item => GetText(item, "name"))
             : filtered.OrderBy(item => GetText(item, "name"));
+    }
+
+    private IEnumerable<JsonElement> FilterTroops(JsonElement troops, string group)
+    {
+        var minLevel = int.TryParse(troopMinimum, out var parsed) ? parsed : 0;
+        var filtered = troops.EnumerateArray()
+            .Where(troop => group switch
+            {
+                "builder" => GetText(troop, "village").Equals("builderBase", StringComparison.OrdinalIgnoreCase),
+                "super" => IsSuperTroop(troop),
+                _ => !GetText(troop, "village").Equals("builderBase", StringComparison.OrdinalIgnoreCase) && !IsSuperTroop(troop)
+            })
+            .Where(troop => GetText(troop, "name").Contains(troopSearch.Trim(), StringComparison.OrdinalIgnoreCase))
+            .Where(troop => int.TryParse(GetText(troop, "level"), out var level) && level >= minLevel);
+        return troopSort == "level"
+            ? filtered.OrderByDescending(troop => int.TryParse(GetText(troop, "level"), out var level) ? level : 0).ThenBy(troop => GetText(troop, "name"))
+            : filtered.OrderBy(troop => GetText(troop, "name"));
+    }
+
+    private static bool IsSuperTroop(JsonElement troop)
+    {
+        if (troop.TryGetProperty("superTroopIsActive", out var active) && active.ValueKind == JsonValueKind.True)
+            return true;
+
+        var name = GetText(troop, "name");
+        return name.StartsWith("Super ", StringComparison.OrdinalIgnoreCase) || name is "Sneaky Goblin" or "Rocket Balloon" or "Inferno Dragon" or "Ice Hound";
     }
 
     private async Task LoadPlayerAsync()

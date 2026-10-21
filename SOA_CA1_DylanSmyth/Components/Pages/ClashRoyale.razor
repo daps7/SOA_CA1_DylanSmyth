@@ -84,8 +84,8 @@
                                 <input aria-label="Search badges" placeholder="Search badges" @bind="badgeSearch" @bind:event="oninput" />
                                 <select aria-label="Sort badges" @bind="badgeSort"><option value="name">Name A to Z</option><option value="level">Level high to low</option></select>
                             </div>
-                            <div class="item-list">
-                                @foreach (var badge in FilterItems(badges, badgeSearch, badgeSort).Take(6))
+                            <div class="item-list badge-list" role="region" aria-label="Player badges" tabindex="0">
+                                @foreach (var badge in FilterItems(badges, badgeSearch, badgeSort))
                                 {
                                     <div class="level-row">
                                         <span>@GetText(badge, "name")</span>
@@ -123,9 +123,14 @@
                     <div class="collection-controls">
                         <input aria-label="Search card collection" placeholder="Search cards" @bind="cardSearch" @bind:event="oninput" />
                         <select aria-label="Sort card collection" @bind="cardSort"><option value="name">Name A to Z</option><option value="level">Level high to low</option><option value="elixir">Elixir high to low</option></select>
-                        <select aria-label="Filter card rarity" @bind="cardRarity"><option value="all">All rarities</option><option value="common">Common</option><option value="rare">Rare</option><option value="epic">Epic</option><option value="legendary">Legendary</option><option value="champion">Champion</option></select>
                         <select aria-label="Filter card levels" @bind="minimumCardLevel"><option value="0">Any level</option><option value="11">Level 11+</option><option value="13">Level 13+</option><option value="15">Level 15+</option><option value="16">Level 16</option></select>
                         <select aria-label="Maximum elixir cost" @bind="maximumElixir"><option value="10">Any cost</option><option value="3">3 or less</option><option value="4">4 or less</option><option value="5">5 or less</option></select>
+                    </div>
+                    <div class="rarity-filters" role="group" aria-label="Filter cards by rarity">
+                        @foreach (var rarity in new[] { (Key: "all", Label: "All"), (Key: "common", Label: "Common"), (Key: "rare", Label: "Rare"), (Key: "epic", Label: "Epic"), (Key: "legendary", Label: "Legendary"), (Key: "champion", Label: "Champions") })
+                        {
+                            <button type="button" class="@(cardRarity == rarity.Key ? "selected" : null)" aria-pressed="@(cardRarity == rarity.Key)" @onclick="() => SetCardRarity(rarity.Key)">@rarity.Label</button>
+                        }
                     </div>
                     <div class="card-collection-grid">
                         @foreach (var card in FilterCards(cards))
@@ -164,6 +169,8 @@
     private string badgeSearch = string.Empty, badgeSort = "name";
     private string cardSearch = string.Empty, cardSort = "name", maximumElixir = "10";
     private string cardRarity = "all", minimumCardLevel = "0";
+
+    private void SetCardRarity(string rarity) => cardRarity = rarity;
 
     private static IEnumerable<JsonElement> FilterItems(JsonElement items, string search, string sort)
     {

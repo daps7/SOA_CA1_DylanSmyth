@@ -72,6 +72,7 @@ h2 { margin: 3px 0 0; font-size: 15px; font-weight: 600; color: #252d3a; }
 .muted-note { margin: 0; color: #818b99; font-size: 11px; }
 .section-count { margin-left: auto; color: #818b99; font-size: 10px; font-weight: 400; }
 .item-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.badge-list { max-height: 260px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
 .item-row { display: flex; justify-content: space-between; gap: 8px; padding: 8px 9px; border-radius: 5px; background: #f5f7fa; color: #5a6575; font-size: 10px; }
 .item-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item-row strong { flex: 0 0 auto; color: #303949; font-weight: 600; }
@@ -250,7 +251,15 @@ h2 { margin-top: 4px; font-size: 19px; font-weight: 700; letter-spacing: -.25px;
 .collection-controls input { flex: 1 1 120px; }
 .collection-controls select { flex: 0 1 auto; }
 .collection-controls input:focus, .collection-controls select:focus { border-color: #7192dc; outline: 2px solid #3869d414; }
+.rarity-filters { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 12px; }
+.rarity-filters button { padding: 7px 10px; border: 1px solid #343943; border-radius: 20px; color: #c0c7d2; background: #14161b; font: 11px Arial, sans-serif; cursor: pointer; }
+.rarity-filters button:hover { border-color: #6878d5; color: #fff; }
+.rarity-filters button.selected { border-color: #7484eb; color: #fff; background: #353d70; }
+.rarity-filters button:focus-visible { outline: 2px solid #9aa6ff; outline-offset: 2px; }
 .collection-panel .panel-heading { margin-bottom: 12px; }
+.troop-group + .troop-group { margin-top: 18px; padding-top: 15px; border-top: 1px solid #e9edf3; }
+.troop-group-heading { margin-bottom: 9px; }
+.troop-group-heading h3 { margin: 0; color: #34445c; font-size: 13px; font-weight: 700; }
 .level-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; padding: 10px 11px; border: 1px solid #edf0f5; border-radius: 8px; background: #f9fafc; color: #526179; font-size: 11px; }
 .level-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .level-row strong { flex: 0 0 auto; color: #2e3e55; font-size: 11px; }
@@ -343,6 +352,10 @@ html, body, .app-shell, .main-panel, .content-area { background: #08090c; color:
 .method-tag { border-color: #343943; color: #91c99a; }
 .field-label, .detail-section h3 { color: #c4cad4; }
 .detail-section { border-color: #292d35; }
+.troop-group + .troop-group { border-color: #292d35; }
+.troop-group-heading h3 { color: #c4cad4; }
+.collection-controls input, .collection-controls select { border-color: #343943; color: #e0e4eb; background: #14161b; color-scheme: dark; }
+.collection-controls input::placeholder { color: #7e8795; }
 .clan-card strong, .item-row strong, .level-row strong { color: #e0e4eb; }
 .clan-card small { color: #98a2b1; }
 .banner-badge { border-color: #343943; }
@@ -370,9 +383,6 @@ html, body, .app-shell, .main-panel, .content-area { background: #08090c; color:
 .card-collection-panel .collection-card-top span,
 .card-collection-panel .collection-card-meta { color: #9ba5b4; }
 .card-collection-panel .collection-card-meta strong { color: #aebcff; }
-.card-collection-panel .collection-controls input,
-.card-collection-panel .collection-controls select { border-color: #343943; color: #e0e4eb; background: #14161b; color-scheme: dark; }
-.card-collection-panel .collection-controls input::placeholder { color: #7e8795; }
 .game-page .profile-stats .stat { min-height: 70px; }
 @media (max-width: 600px) {
     .game-hero { min-height: 175px; margin: 20px 0 14px; padding: 20px; }
